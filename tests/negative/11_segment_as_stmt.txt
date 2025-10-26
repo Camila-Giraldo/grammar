@@ -1,0 +1,3 @@
+BEGIN
+  A[1..n]
+END

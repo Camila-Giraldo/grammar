@@ -1,0 +1,4 @@
+BEGIN
+  foo(1, 2+3)
+  PRINT("ok", 1+2)
+END

@@ -1,0 +1,5 @@
+BEGIN
+  WHILE ((i <- i + 1) < 10) DO
+     VAR x <- 0
+  ENDWHILE
+END

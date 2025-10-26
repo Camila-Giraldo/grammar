@@ -1,0 +1,9 @@
+BEGIN
+  VAR x <- 10
+  VAR suma <- 0
+  WHILE (x > 0) DO
+    suma <- suma + x
+    x <- x - 1
+  ENDWHILE
+  PRINT(suma)
+END

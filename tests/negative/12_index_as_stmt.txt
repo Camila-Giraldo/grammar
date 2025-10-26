@@ -1,0 +1,5 @@
+BEGIN
+  VAR i <- 1
+  VAR A[10]
+  A[i]
+END

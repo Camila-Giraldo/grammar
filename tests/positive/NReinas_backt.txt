@@ -1,0 +1,10 @@
+esValido(tablero[100], n) BEGIN
+  VAR result <- True
+  RETURN result
+END
+
+BEGIN
+  VAR n <- 4
+  VAR tablero[100]
+  PRINT("N-Reinas solver")
+END

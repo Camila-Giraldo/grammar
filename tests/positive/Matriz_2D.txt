@@ -1,0 +1,18 @@
+sumar_matrices(A[100], B[100], C[100], n) BEGIN
+  VAR i <- 1
+  VAR j <- 1
+  FOR i <- 1 TO n DO
+    FOR j <- 1 TO n DO
+      C[i] <- A[i] + B[i]
+    ENDFOR
+  ENDFOR
+END
+
+BEGIN
+  VAR n <- 3
+  VAR A[100]
+  VAR B[100]
+  VAR C[100]
+  CALL sumar_matrices(A, B, C, n)
+  PRINT("Suma de matrices completada")
+END

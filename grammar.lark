@@ -1,0 +1,196 @@
+// ===== IMPORTACIONES Y CONFIGURACIÓN BÁSICA =====
+%import common.WS                      // Importa espacios en blanco de Lark
+%import common.ESCAPED_STRING -> STRING // Importa strings con escape (ej: "hola\n")
+%ignore WS                             // Ignora espacios en blanco
+%ignore /►.*/                          // Ignora comentarios de línea que empiezan con ►
+
+// ===== TOKENS: PALABRAS CLAVE Y SÍMBOLOS =====
+
+// Operadores y símbolos especiales
+ASSIGN.4: "←" | "🡨" | "<-"       
+// Rango de índices de array: 1..10
+DOTDOT.2: ".."                   
+POW.2: "^" | "**"                
+MUL: "*"                         
+DIV: "/" | "div"                 
+MOD: "mod" | "%"                 
+OPREL.2: "=" | "<>" | "!=" | "<=" | ">=" | "<" | ">" | "≤" | "≥" 
+
+// Palabras clave de declaración
+VAR.2: /(?i:var)\b/                    
+OBJ.2: "NEW" | "OBJ"                   
+
+// Palabras clave de control de flujo
+IF.2: "IF"                             
+THEN.2: "THEN"                         
+ELSE.2: "ELSE"                         
+ENDIF.2: "ENDIF"                       
+WHILE.2: "WHILE"                       
+DO.2: "DO"                             
+ENDWHILE.2: "ENDWHILE"                 
+FOR.2: "FOR"                           
+TO.2: "TO"                             
+ENDFOR.2: "ENDFOR"                     
+REPEAT.2: "REPEAT"                     
+UNTIL.2: "UNTIL"                       
+
+// Palabras clave de subrutinas y bloques
+CALL.2: "CALL"                         // Llamada explícita a función
+BEGIN.2: "BEGIN"                       
+END.2: "END"                           
+RETURN.2: "RETURN" | "↑"               
+PRINT.2: "PRINT"                       
+
+// Operadores lógicos
+AND.2: /(?i:and)\b/                    
+OR.2: /(?i:or)\b/                     
+NOT.2: /(?i:not)\b/                   
+
+// Literales
+NUMBER: /[+-]?\d+(?:\.\d+)?/          
+TRUE.2: "True"                         
+FALSE.2: "False"                      
+
+// Identificadores (nombres de variables, funciones, etc.)
+IDENT: /[a-zA-Z_][a-zA-Z0-9_]*/     
+
+start: class_def* subroutine_def* BEGIN block_main+ END
+
+// ===== DEFINICIÓN DE CLASES =====
+class_def: IDENT "{" attr_list "}"
+// Lista de atributos separados por comas (puede estar vacía)
+attr_list: (IDENT ("," IDENT)*)?      
+
+block_main: block_item_main*           // Bloque en contexto principal (cero o más items)
+block_sub:  block_item_sub*            // Bloque en contexto de subrutina (cero o más items)
+
+// Items que pueden aparecer en cada tipo de bloque
+block_item_main: var_decl | obj_decl | statement_main
+block_item_sub:  var_decl | obj_decl | statement_sub
+
+// Dimensiones de array: [10] o [n] o [10][20]
+array_dims: "[" (NUMBER | IDENT) "]"+
+
+// Declaración de variable: puede ser array o variable con inicialización
+// Ejemplos: VAR arr[100]  o  VAR x <- 5
+var_decl: VAR IDENT array_dims 
+        | VAR IDENT ASSIGN expression
+
+// Declaración de objeto
+// Ejemplo: OBJ miObjeto MiClase
+obj_decl: OBJ IDENT IDENT
+
+// Statements permitidos en el bloque principal
+statement_main: assign_or_compare | if_stmt_main 
+        | while_stmt_main | for_stmt_main 
+        | repeat_stmt_main | print_stmt | func_call
+
+// Statements permitidos en subrutinas 
+statement_sub: assign_or_compare | if_stmt_sub 
+        | while_stmt_sub | for_stmt_sub 
+        | repeat_stmt_sub | print_stmt 
+        | return_stmt | func_call
+
+// ===== STATEMENTS BÁSICOS =====
+
+// Impresión por consola: PRINT(arg1, arg2, ...)
+print_stmt: PRINT "(" [arg_list] ")"
+
+// Retorno de función: RETURN expresión (o RETURN sin valor)
+return_stmt: RETURN [pure_expr]
+
+// ===== SUITES: SECUENCIAS DE INSTRUCCIONES DENTRO DE ESTRUCTURAS DE CONTROL =====
+// Las suites son bloques que aparecen dentro de IF, WHILE, FOR, REPEAT
+// (al menos una instrucción es requerida)
+
+suite_main: suite_item_main+
+suite_item_main: var_decl | obj_decl | statement_main
+
+suite_sub: suite_item_sub+
+suite_item_sub: var_decl | obj_decl | statement_sub
+
+if_stmt_main: IF "(" condition ")" THEN suite_main (ELSE suite_main)? ENDIF
+if_stmt_sub: IF "(" condition ")" THEN suite_sub (ELSE suite_sub)? ENDIF
+
+while_stmt_main: WHILE "(" condition ")" DO suite_main ENDWHILE
+while_stmt_sub: WHILE "(" condition ")" DO suite_sub ENDWHILE
+
+for_stmt_main: FOR IDENT ASSIGN expression TO expression DO suite_main ENDFOR
+for_stmt_sub: FOR IDENT ASSIGN expression TO expression DO suite_sub ENDFOR
+
+repeat_stmt_main: REPEAT suite_main UNTIL "(" condition ")"
+repeat_stmt_sub: REPEAT suite_sub UNTIL "(" condition ")"
+
+// ================================================================================
+// ===== DEFINICIÓN DE SUBRUTINAS/FUNCIONES =====
+// ================================================================================
+// Ejemplo: nombreFuncion(param1, param2[100], objParam TipoObj) BEGIN ... END
+subroutine_def: IDENT "(" [param_list] ")" BEGIN block_sub END
+
+param_list: param ("," param)*
+
+param: array_param | obj_param | IDENT
+array_param: IDENT array_dims
+obj_param: IDENT IDENT
+
+array_access: IDENT array_indices
+array_indices: "[" expression "]"+
+
+lvalue: IDENT 
+        | array_access 
+        | IDENT "[" expression DOTDOT expression "]" 
+        | IDENT "." IDENT
+
+assign_or_compare: lvalue ASSIGN expression
+
+
+// IMPORTANTE: El símbolo ? hace que la regla sea "inline" (no crea nodo en AST)
+?expression: assign_or_compare | pure_expr
+
+?pure_expr: arith_expr
+
+?arith_expr: arith_expr "+" term -> add 
+        | arith_expr "-" term -> sub 
+        | term
+
+?term: term MUL power -> mul 
+        | term DIV power -> div 
+        | term MOD power -> mod 
+        | power
+
+?power: factor (POW power)? -> pow
+
+?factor: NUMBER 
+        | STRING 
+        | TRUE -> true 
+        | FALSE -> false 
+        | "null" -> null 
+        | IDENT 
+        | array_access 
+        | IDENT "[" expression DOTDOT expression "]" 
+        | IDENT "." IDENT 
+        | func_call 
+        | "⌊" pure_expr "⌋" 
+        | "⌈" pure_expr "⌉" 
+        | "(" pure_expr ")"
+
+func_call: CALL IDENT "(" [arg_list] ")" 
+        | IDENT "(" [arg_list] ")"
+
+arg_list: pure_expr ("," pure_expr)*
+
+?condition: condition_or
+
+?condition_or: condition_or OR condition_and -> or_expr 
+        | condition_and
+
+?condition_and: condition_and AND condition_not -> and_expr 
+        | condition_not
+
+?condition_not: NOT condition_not -> not_expr 
+        | condition_atom
+
+condition_atom: comparison 
+        | "(" condition_or ")"
+
+comparison: pure_expr OPREL pure_expr

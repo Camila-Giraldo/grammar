@@ -1,0 +1,40 @@
+partition(A[100], low, high) BEGIN
+  VAR pivot <- A[high]
+  VAR i <- low - 1
+  VAR j <- low
+  VAR temp <- 0
+  FOR j <- low TO high - 1 DO
+    IF (A[j] < pivot) THEN
+      i <- i + 1
+      temp <- A[i]
+      A[i] <- A[j]
+      A[j] <- temp
+    ENDIF
+  ENDFOR
+  temp <- A[i + 1]
+  A[i + 1] <- A[high]
+  A[high] <- temp
+  RETURN i + 1
+END
+
+quickSort(A[100], low, high) BEGIN
+  IF (low < high) THEN
+    VAR p <- partition(A, low, high)
+    CALL quickSort(A, low, p - 1)
+    CALL quickSort(A, p + 1, high)
+  ENDIF
+END
+
+BEGIN
+  VAR A[100]
+  VAR n <- 10
+  VAR i <- 1
+  FOR i <- 1 TO n DO
+    A[i] <- n - i
+  ENDFOR
+  CALL quickSort(A, 1, n)
+  PRINT("Array ordenado:")
+  FOR i <- 1 TO n DO
+    PRINT(A[i])
+  ENDFOR
+END

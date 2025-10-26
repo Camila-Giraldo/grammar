@@ -1,0 +1,8 @@
+BEGIN
+  VAR contador <- 0
+  REPEAT
+    PRINT(contador)
+    contador <- contador + 1
+  UNTIL (contador >= 5)
+  PRINT("Fin")
+END

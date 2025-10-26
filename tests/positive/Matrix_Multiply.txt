@@ -1,0 +1,26 @@
+idx(i, j, n) BEGIN
+  RETURN (i - 1) * n + j
+END
+
+multiplicar(A[10000], B[10000], C[10000], n) BEGIN
+  VAR i <- 1
+  VAR j <- 1
+  VAR k <- 1
+  FOR i <- 1 TO n DO
+    FOR j <- 1 TO n DO
+      C[idx(i,j,n)] <- 0
+      FOR k <- 1 TO n DO
+        C[idx(i,j,n)] <- C[idx(i,j,n)] + A[idx(i,k,n)] * B[idx(k,j,n)]
+      ENDFOR
+    ENDFOR
+  ENDFOR
+END
+
+BEGIN
+  VAR n <- 3
+  VAR A[10000]
+  VAR B[10000]
+  VAR C[10000]
+  CALL multiplicar(A, B, C, n)
+  PRINT("Multiplicación terminada")
+END

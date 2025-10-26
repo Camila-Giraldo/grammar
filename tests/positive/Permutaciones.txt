@@ -1,0 +1,33 @@
+intercambiar(A[100], i, j) BEGIN
+  VAR temp <- A[i]
+  A[i] <- A[j]
+  A[j] <- temp
+END
+
+permutar(A[100], l, r) BEGIN
+  VAR t <- 1
+  VAR i <- l
+  IF (l = r) THEN
+    t <- 1
+    FOR t <- 1 TO r DO
+      PRINT(A[t])
+    ENDFOR
+    RETURN
+  ELSE
+    FOR i <- l TO r DO
+      CALL intercambiar(A, l, i)
+      CALL permutar(A, l + 1, r)
+      CALL intercambiar(A, l, i)
+    ENDFOR
+  ENDIF
+END
+
+BEGIN
+  VAR n <- 3
+  VAR A[100]
+  VAR i <- 1
+  FOR i <- 1 TO n DO
+    A[i] <- i
+  ENDFOR
+  CALL permutar(A, 1, n)
+END

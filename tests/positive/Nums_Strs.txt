@@ -1,0 +1,14 @@
+procesar_datos() BEGIN
+  VAR num1 <- 42
+  VAR num2 <- 3.14
+  VAR texto <- "Hola"
+  VAR booleano <- True
+  PRINT(num1)
+  PRINT(num2)
+  PRINT(texto)
+  PRINT(booleano)
+END
+
+BEGIN
+  CALL procesar_datos()
+END

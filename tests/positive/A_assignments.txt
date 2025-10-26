@@ -1,0 +1,8 @@
+BEGIN
+  VAR n <- 3
+  VAR A[10]
+  A[1] ← 5
+  A[2..n] ← 0
+  OBJ Punto p
+  p.x ← 7
+END

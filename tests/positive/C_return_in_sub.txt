@@ -1,0 +1,9 @@
+sumar(a[10]) BEGIN
+  VAR s <- 0
+  RETURN s
+END
+
+BEGIN
+  VAR A[10]
+  PRINT("listo")
+END

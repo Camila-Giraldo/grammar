@@ -1,0 +1,3 @@
+BEGIN
+  A[10]
+END

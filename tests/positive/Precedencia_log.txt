@@ -1,0 +1,18 @@
+calcular() BEGIN
+  VAR a <- 5
+  VAR b <- 3
+  VAR c <- (a + b) * 2
+  VAR d <- c ^ 2
+  VAR e <- d / (a - b)
+  IF (e > 10) THEN
+    PRINT("Mayor que 10")
+  ELSE
+    PRINT("Menor o igual a 10")
+  ENDIF
+  RETURN e
+END
+
+BEGIN
+  VAR resultado <- calcular()
+  PRINT(resultado)
+END

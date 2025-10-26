@@ -1,0 +1,38 @@
+idx(i, j, n) BEGIN
+  RETURN (i - 1) * n + j
+END
+
+Floyd(G[10000], n) BEGIN
+  VAR i <- 1
+  VAR j <- 1
+  VAR k <- 1
+  VAR ik <- 0
+  VAR kj <- 0
+  VAR ij <- 0
+  FOR k <- 1 TO n DO
+    FOR i <- 1 TO n DO
+      FOR j <- 1 TO n DO
+        ik <- idx(i, k, n)
+        kj <- idx(k, j, n)
+        ij <- idx(i, j, n)
+        IF (G[ik] + G[kj] < G[ij]) THEN
+          G[ij] <- G[ik] + G[kj]
+        ENDIF
+      ENDFOR
+    ENDFOR
+  ENDFOR
+END
+
+BEGIN
+  VAR n <- 4
+  VAR i <- 1
+  VAR j <- 1
+  VAR G[10000]
+  FOR i <- 1 TO n DO
+    FOR j <- 1 TO n DO
+      G[idx(i,j,n)] <- 0
+    ENDFOR
+  ENDFOR
+  CALL Floyd(G, n)
+  PRINT("Floyd completado")
+END

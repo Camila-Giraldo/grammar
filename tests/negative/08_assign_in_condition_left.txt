@@ -1,0 +1,5 @@
+BEGIN
+  IF ((a <- 1) = 2) THEN
+     VAR x <- 0
+  ENDIF
+END
